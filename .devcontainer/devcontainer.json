@@ -5,14 +5,10 @@
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-    "mounts": [
-      "source=${env:SSH_AUTH_SOCK},target=/ssh-agent,type=bind"
-    ],
     "remoteEnv": {
-      "SSH_AUTH_SOCK": "/ssh-agent/agent.sock"
+      "SSH_AUTH_SOCK": "${env:SSH_AUTH_SOCK}"
     },
-
-  // Features to add to the dev container. More info: https://containers.dev/features.
+    // Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {}
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -25,7 +21,15 @@
 	// Configure tool-specific properties.
   "customizations" : {
     "jetbrains" : {
-      "backend" : "IntelliJ"
+      "backend" : "IntelliJ",
+      "plugins": [
+        "com.github.copilot",
+        "com.intellij.spring",
+        "com.intellij.spring.graphql",
+        "com.intellij.lang.jsgraphql",
+        "net.ashald.envfile",
+        "izhangzhihao.rainbow.brackets"
+      ]
     }
   }
 
