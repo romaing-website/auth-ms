@@ -1,4 +1,4 @@
-//import org.springframework.data.jpa.repository.JpaRepository
-//import fr.rguillemot.website.backend.model.User
+import org.springframework.data.jpa.repository.JpaRepository
+import fr.rguillemot.website.backend.model.User
 
-//interface UserRepository : JpaRepository<User, Long>
+interface UserRepository : JpaRepository<User, Long>
