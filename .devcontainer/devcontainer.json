@@ -6,10 +6,10 @@
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
     "mounts": [
-      "source=${env:SSH_AUTH_SOCK},target=/ssh-agent,type=bind"
+      "source=${env:SSH_AUTH_SOCK},target=/ssh-agent/agent.sock,type=bind"
     ],
     "remoteEnv": {
-      "SSH_AUTH_SOCK": "/ssh-agent"
+      "SSH_AUTH_SOCK": "/ssh-agent/agent.sock"
     },
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {}
