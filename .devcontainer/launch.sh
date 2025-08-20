@@ -9,6 +9,17 @@ cyan="\033[36m"
 gray="\033[90m"
 reset="\033[0m"
 
+# === FLAGS ===
+DEBUG_MODE=false
+for arg in "$@"; do
+  case "$arg" in
+    --debug)
+      DEBUG_MODE=true
+      shift
+      ;;
+  esac
+done
+
 # === CUSTOM ECHO ===
 function custom_echo {
   local timestamp=$(date +"%H:%M:%S")
@@ -56,6 +67,13 @@ export DB_PORT=5432
 export DB_NAME=postgres
 export DB_USER=postgres
 export DB_PASS=postgres
+export APP_KEY="debugkey"
+export APP_PROFILE="dev"
+export APP_FRONTEND_URL="*"
+if [ "$DEBUG_MODE" = true ]; then
+  export LOG_LEVEL="DEBUG"
+  custom_echo "Debug mode ON → LOG_LEVEL=$LOG_LEVEL, Profile=$APP_PROFILE" DEBUG
+fi
 
 custom_echo "Environment variables set (DB_HOST=$DB_HOST, DB_PORT=$DB_PORT)."
 

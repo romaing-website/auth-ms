@@ -1,4 +1,0 @@
-type Query {
-  hello(name: String = "world"): String!
-  calculate(expr: String!): Float!
-}

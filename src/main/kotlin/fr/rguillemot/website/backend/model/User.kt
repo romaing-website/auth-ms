@@ -2,16 +2,14 @@ package fr.rguillemot.website.backend.model
 
 import jakarta.persistence.*
 import java.time.Instant
+import java.util.UUID
 
 @Entity
 @Table(name = "\"user\"")
 data class User(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
-
-    @Column(nullable = false, unique = true, length = 32)
-    val username: String,
+    @Column(columnDefinition = "UUID", updatable = false, nullable = false)
+    val id: UUID = UUID.randomUUID(),
 
     @Column(nullable = false, unique = true, length = 255)
     val email: String,
@@ -29,7 +27,7 @@ data class User(
     val role: String = "user",
 
     @Column(name = "is_active")
-    val isActive: Boolean = true,
+    val isActive: Boolean = false,
 
     @Column(name = "created_at")
     val createdAt: Instant = Instant.now(),

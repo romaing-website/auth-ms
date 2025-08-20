@@ -2,13 +2,14 @@ package fr.rguillemot.website.backend.model
 
 import jakarta.persistence.*
 import java.time.Instant
+import java.util.UUID
 
 @Entity
 @Table(name = "\"user_passkey\"")
 data class UserPasskey(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    @Column(columnDefinition = "UUID", updatable = false, nullable = false)
+    val id: UUID = UUID.randomUUID(),
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
