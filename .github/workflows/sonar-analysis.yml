@@ -11,17 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Trivy Scan (custom endpoint, auth)
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '1'
         env:
           TRIVY_SERVER: https://trivy.romain-guillemot.dev
           TRIVY_USERNAME: ${{ secrets.TRIVY_USERNAME }}
           TRIVY_PASSWORD: ${{ secrets.TRIVY_PASSWORD }}
-        run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b . latest
-          ./trivy fs . \
-            --server ${TRIVY_SERVER} \
-            --username ${TRIVY_USERNAME} \
-            --password ${TRIVY_PASSWORD}
   build:
     name: Build, analyze and release
     runs-on: ubuntu-latest
