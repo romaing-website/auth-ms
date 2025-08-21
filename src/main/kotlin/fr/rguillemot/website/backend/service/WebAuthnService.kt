@@ -11,10 +11,8 @@ import fr.rguillemot.website.backend.request.Login.LoginRequest
 import fr.rguillemot.website.backend.request.RegisterVerifyRequest
 import fr.rguillemot.website.backend.type.CeremonyType
 import fr.rguillemot.website.backend.type.ChallengeIssueResult
-import fr.rguillemot.website.backend.type.ChallengePayload
 import fr.rguillemot.website.backend.type.ChallengePayloadFull
 import fr.rguillemot.website.backend.type.ChallengeRecord
-import fr.rguillemot.website.backend.type.PasskeyAuthRequest
 import fr.rguillemot.website.backend.utils.b64urlEncode
 import fr.rguillemot.website.backend.utils.randomBytes
 import fr.rguillemot.website.backend.utils.secureEquals
@@ -28,9 +26,7 @@ import java.security.spec.ECParameterSpec
 import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
 import java.security.spec.EllipticCurve
-import java.security.spec.X509EncodedKeySpec
 import java.time.Instant
-import java.util.UUID
 
 
 //TODO: Challenge auto removed
@@ -47,7 +43,10 @@ class WebAuthnService(
     private val userPasskeyRepository: UserPasskeyRepository
 ) {
 
-
+    val pubKeyCredParams = "pubKeyCredParams" to listOf(
+        mapOf("type" to "public-key", "alg" to -7),   // ES256
+        mapOf("type" to "public-key", "alg" to -257) // RS256
+    )
     /**
      * Generate a new challenge for a given session and ceremony type.
      * Returns both: a record for DB and a payload for the client.
@@ -69,9 +68,7 @@ class WebAuthnService(
             createdAt = now,
             expiresAt = expiresAt
         )
-        if(record.user == null) {
-            throw IllegalStateException("Failed to save challenge")
-        }
+        checkNotNull(record.user) { "Failed to save challenge" }
 
         val payload = mapOf(
             "rp" to mapOf(
@@ -84,10 +81,7 @@ class WebAuthnService(
                 "displayName" to displayName
             ),
             "challenge" to challengeB64,
-            "pubKeyCredParams" to listOf(
-                mapOf("type" to "public-key", "alg" to -7),   // ES256
-                mapOf("type" to "public-key", "alg" to -257) // RS256
-            ),
+            pubKeyCredParams,
             "authenticatorSelection" to mapOf(
                 "userVerification" to "preferred"
             ),
@@ -136,10 +130,7 @@ class WebAuthnService(
                 "name" to config.rpName
             ),
             "challenge" to challengeB64,
-            "pubKeyCredParams" to listOf(
-                mapOf("type" to "public-key", "alg" to -7),   // ES256
-                mapOf("type" to "public-key", "alg" to -257) // RS256
-            ),
+            pubKeyCredParams,
             "authenticatorSelection" to mapOf(
                 "userVerification" to "preferred"
             ),
@@ -167,12 +158,12 @@ class WebAuthnService(
     }
 
 
-    fun saveCredential(user: User, credential_id: String, public_key: String, sign_Count: Int) {
+    fun saveCredential(user: User, credentialId: String, publicKey: String, signCount: Int) {
         val userCredential = UserPasskey(
             user = user,
-            credentialId = credential_id,
-            publicKey = public_key,
-            signCount = sign_Count
+            credentialId = credentialId,
+            publicKey = publicKey,
+            signCount = signCount
         )
         userPasskeyRepository.save(userCredential)
     }
@@ -195,10 +186,7 @@ class WebAuthnService(
         if (stored.type != expectedType) return false
 
         // check expiration
-        if (stored.expiresAt != null && Instant.now().isAfter(stored.expiresAt)) {
-            // choose your policy: throw or return false
-            throw IllegalStateException("Challenge is expired")
-        }
+        check(!(stored.expiresAt != null && Instant.now().isAfter(stored.expiresAt))) { "Challenge is expired" }
 
         // constant-time comparison to reduce timing leaks
         return secureEquals(stored.challengeB64Url, incomingChallengeB64Url)
@@ -214,7 +202,7 @@ class WebAuthnService(
         val signature = java.util.Base64.getUrlDecoder().decode(req.response.signature)
 
         // Récupérer la clé publique associée à l'utilisateur (si présente)
-        val passKey = userPasskeyRepository.findByUser_Email(req.email) ?: return false
+        val passKey = userPasskeyRepository.findByUserEmail(req.email) ?: return false
 
         // Vérification de la signature
         return verifyWithPublicKey(passKey.publicKey, authenticatorData, clientData, signature)
@@ -269,10 +257,7 @@ class WebAuthnService(
         }
     }
     //TODO: Edit list of url for use application variables.
-    private fun isValidOrigin(origin: String): Boolean {
-        val allowedOrigins = listOf("http://localhost:8234")
-        return allowedOrigins.contains(origin)
-    }
+    //TODO: Add isValidOrigin for check key origin
 
 
     private fun coseToECPublicKey(cose: ByteArray): PublicKey {
@@ -282,8 +267,8 @@ class WebAuthnService(
         println(tree)
         println("COSE raw: ${cose.joinToString(",")}")
         println("CBOR tree: $tree")
-        val x = tree.get("-2").binaryValue()
-        val y = tree.get("-3").binaryValue()
+        val x = tree["-2"].binaryValue()
+        val y = tree["-3"].binaryValue()
 
         // Paramètres courbe P-256 secp256r1
         val p = BigInteger("115792089210356248762697446949407573530086143415290314195533631308867097853951")

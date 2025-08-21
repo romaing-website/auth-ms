@@ -9,6 +9,22 @@ jobs:
   build:
     name: Build, analyze and release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +52,17 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      - name: Set environment variables
+        run: |
+          echo "DB_HOST=localhost" >> $GITHUB_ENV
+          echo "DB_PORT=5432" >> $GITHUB_ENV
+          echo "DB_NAME=postgres" >> $GITHUB_ENV
+          echo "DB_USER=postgres" >> $GITHUB_ENV
+          echo "DB_PASS=postgres" >> $GITHUB_ENV
+          echo "APP_KEY=debugkey" >> $GITHUB_ENV
+          echo "APP_PROFILE=dev" >> $GITHUB_ENV
+          echo "APP_FRONTEND_URL=*" >> $GITHUB_ENV
+
       - name: Get next version
         id: version
         run: |
@@ -46,7 +73,6 @@ jobs:
           else
             VERSION=${LATEST_TAG#v}
             IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-          
             PATCH=$((PATCH + 1))
           
             if [ $PATCH -gt 9 ]; then
@@ -59,7 +85,6 @@ jobs:
           
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "Next version: $NEW_VERSION"
 
       - name: Update pom.xml version
         run: |
@@ -83,6 +108,7 @@ jobs:
             | jq -r '.projectStatus.status')
           
           if [ "$STATUS" != "OK" ]; then
+            echo "Quality Gate failed: $STATUS"
             exit 1
           fi
 
@@ -97,28 +123,14 @@ jobs:
           git push origin ${{ steps.version.outputs.tag }}
 
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: create_release
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          release_name: Release ${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
           body: |
-            ## Changes
-            - Automated release from main branch
-            - SonarQube analysis passed ✅
-            
-            ## Artifacts
-            - auth-ms-${{ steps.version.outputs.version }}.jar
-          draft: false
-          prerelease: false
-
-      - name: Upload JAR to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/auth-ms-${{ steps.version.outputs.version }}.jar
-          asset_name: auth-ms-${{ steps.version.outputs.version }}.jar
-          asset_content_type: application/java-archive
+            ## Auth MS Release ${{ steps.version.outputs.version }}
+            - SonarQube Quality Gate passed
+            - Built with Java 21
+            - 🗄PostgreSQL tests passed
+          files: ./target/auth-ms-${{ steps.version.outputs.version }}.jar

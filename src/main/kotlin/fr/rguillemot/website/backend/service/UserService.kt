@@ -2,9 +2,7 @@ package fr.rguillemot.website.backend.service
 
 import fr.rguillemot.website.backend.model.User
 import fr.rguillemot.website.backend.repository.UserRepository
-import fr.rguillemot.website.backend.type.ApiResponse
 import fr.rguillemot.website.backend.type.Service.CreateResult
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 

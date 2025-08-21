@@ -8,8 +8,11 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface UserPasskeyRepository : JpaRepository<UserPasskey, Long> {
-    fun  findByUser_Email(userEmail: String): UserPasskey?
+
     fun findByCredentialId(credentielId: String): UserPasskey?
+
+    @Query("SELECT up FROM UserPasskey up WHERE up.user.email = :userEmail")
+    fun findByUserEmail(userEmail: String): UserPasskey?
 
     @Query("SELECT u.user FROM UserPasskey u WHERE u.credentialId = :credentialId")
     fun findUserByCredentialId(credentialId: String): User?

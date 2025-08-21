@@ -89,7 +89,7 @@ class RegisterController(
         val clientData = com.fasterxml.jackson.module.kotlin.jacksonObjectMapper().readValue(clientDataJson, Map::class.java)
         val originalChallenge = clientData["challenge"] as String
 
-        val challengeData = webAuthnChallengesRepository.findByUser_EmailAndChallenge(req.email, originalChallenge)
+        val challengeData = webAuthnChallengesRepository.findByUserEmailAndChallenge(req.email, originalChallenge)
         println("Stored challenge: ${challengeData?.challenge}")
         println("ClientData: $clientDataJson")
         println("Original challenge: $originalChallenge")
@@ -151,9 +151,9 @@ class RegisterController(
 
         webAuthnService.saveCredential(
             user = user,
-            credential_id = req.rawId,
-            public_key = Base64.getUrlEncoder().withoutPadding().encodeToString(coseKey),
-            sign_Count = 0
+            credentialId = req.rawId,
+            publicKey = Base64.getUrlEncoder().withoutPadding().encodeToString(coseKey),
+            signCount = 0
         )
         return ResponseEntity.ok(
             ApiResponse(
@@ -168,7 +168,7 @@ class RegisterController(
         val attObj = java.util.Base64.getUrlDecoder().decode(attestationObjectB64)
         val mapper = CBORMapper()
         val node = mapper.readTree(attObj)
-        val authData = node.get("authData").binaryValue() // binaire
+        val authData = node["authData"].binaryValue() // binaire
 
         var offset = 37
         val credIdLen = ((authData[offset + 16].toInt() and 0xFF) shl 8) or (authData[offset + 17].toInt() and 0xFF)

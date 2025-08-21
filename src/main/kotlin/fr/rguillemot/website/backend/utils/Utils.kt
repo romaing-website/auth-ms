@@ -3,7 +3,6 @@ package fr.rguillemot.website.backend.utils
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.SecureRandom
-import java.time.Instant
 import java.util.Base64
 
 private val RNG: SecureRandom = SecureRandom()

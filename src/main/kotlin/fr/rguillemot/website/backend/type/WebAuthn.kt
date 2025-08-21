@@ -2,7 +2,6 @@ package fr.rguillemot.website.backend.type
 
 import fr.rguillemot.website.backend.model.User
 import java.time.Instant
-import java.util.UUID
 
 /**
  * Ceremony type to distinguish registration (create) vs authentication (get).

@@ -1,9 +1,7 @@
 package fr.rguillemot.website.backend.controller
 
-import fr.rguillemot.website.backend.repository.UserPasskeyRepository
 import fr.rguillemot.website.backend.repository.WebAuthnChallengesRepository
 import fr.rguillemot.website.backend.request.Login.LoginRequest
-import fr.rguillemot.website.backend.request.RegisterVerifyRequest
 import fr.rguillemot.website.backend.service.UserPassKeyService
 import fr.rguillemot.website.backend.service.WebAuthnService
 import fr.rguillemot.website.backend.type.ApiResponse
