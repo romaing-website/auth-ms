@@ -32,6 +32,15 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Trivy Scan (custom endpoint, auth)
+        env:
+          TRIVY_URL: https://trivy.romain-guillemot.dev
+          TRIVY_USERNAME: ${{ secrets.TRIVY_USERNAME }}
+          TRIVY_PASSWORD: ${{ secrets.TRIVY_PASSWORD }}
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b . trivy
+          ./trivy --remote ${TRIVY_URL} --username ${TRIVY_USERNAME} --password ${TRIVY_PASSWORD} repo .
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
