@@ -16,12 +16,13 @@ enum class CeremonyType {
  * Store as-is; all fields are serializable-friendly.
  */
 data class ChallengeRecord(
-    val user: User,
+    val user: User? = null,
     val challengeB64Url: String,  // base64url-encoded (no padding)
     val type: CeremonyType,
     val createdAt: Instant,
     val expiresAt: Instant? = null // optional TTL if you want server-side timeout
 )
+
 
 /**
  * What you send back to the client (frontend) after createChallenge().
@@ -48,4 +49,19 @@ data class ChallengePayloadFull(
 data class ChallengeIssueResult(
     val recordForDB: ChallengeRecord,
     val payloadForClient: ChallengePayloadFull
+)
+
+
+data class PasskeyAuthRequest(
+    val id: String,
+    val rawId: String,
+    val type: String,
+    val response: AuthResponse
+)
+
+data class AuthResponse(
+    val authenticatorData: String,
+    val clientDataJSON: String,
+    val signature: String,
+    val userHandle: String?
 )

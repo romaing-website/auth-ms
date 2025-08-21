@@ -1,10 +1,11 @@
-package fr.rguillemot.website.backend.request
+package fr.rguillemot.website.backend.request.Login
 
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
+
 
 data class KeyData(
     @field:NotBlank(message = "The clientDataJson field is required")
@@ -19,15 +20,7 @@ data class KeyData(
     val signature: String
 )
 
-data class RegisterVerifyRequest(
-
-    @field:NotBlank(message = "Email is required")
-    @field:Email(message = "Email is invalid")
-    @field:Pattern(
-        regexp = "^[^+@\\s]+@[^@\\s]+\\.[^@\\s]+\$",
-        message = "We don't accept email alias."
-    )
-    val email: String,
+data class LoginRequest(
 
     @field:NotBlank(message = "The id field is required")
     @field:Size(max = 255, message = "The id must not exceed 255 characters")

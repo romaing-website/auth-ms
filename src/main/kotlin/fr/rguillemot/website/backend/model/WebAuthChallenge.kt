@@ -13,9 +13,9 @@ data class WebAuthnChallenge(
     @Column(columnDefinition = "UUID", updatable = false, nullable = false)
     val id: UUID = UUID.randomUUID(),
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    val user: User,
+    val user: User? = null,
 
     @Column(nullable = false)
     val challenge: String,

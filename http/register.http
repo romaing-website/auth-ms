@@ -1,0 +1,17 @@
+### Requête POST pour l'endpoint /register
+POST http://localhost:8080/register
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="email"
+
+test@exdampdle.com
+--boundary
+Content-Disposition: form-data; name="firstName"
+
+John
+--boundary
+Content-Disposition: form-data; name="lastName"
+
+Doe
+--boundary--

@@ -62,7 +62,7 @@ fi
 
 # === ENV VARIABLES ===
 custom_echo "Setting up environment variables..."
-export DB_HOST=db
+export DB_HOST=localhost
 export DB_PORT=5432
 export DB_NAME=postgres
 export DB_USER=postgres
@@ -70,6 +70,7 @@ export DB_PASS=postgres
 export APP_KEY="debugkey"
 export APP_PROFILE="dev"
 export APP_FRONTEND_URL="*"
+
 if [ "$DEBUG_MODE" = true ]; then
   export LOG_LEVEL="DEBUG"
   custom_echo "Debug mode ON → LOG_LEVEL=$LOG_LEVEL, Profile=$APP_PROFILE" DEBUG

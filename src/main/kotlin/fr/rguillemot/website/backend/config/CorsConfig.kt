@@ -23,6 +23,7 @@ class CorsConfig(
                     allowedOrigins(frontendUrl)
                 }
             }
+            .allowedOrigins("http://localhost:8234")
             .allowedMethods("*")
             .allowedHeaders("*")
             .allowCredentials(true)
