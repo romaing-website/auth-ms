@@ -16,20 +16,14 @@ data class UserToken(
     val user: User,
 
     @Column(nullable = false, length = 255)
-    val token: String,
+    var token: String,
 
     @Column(name = "refresh_token", length = 255)
-    val refreshToken: String? = null,
+    var refreshToken: String? = null,
 
-    @Column(name = "device_name", length = 64)
-    val deviceName: String? = null,
-
-    @Column(length = 32)
-    val provider: String = "local",
-
-    @Column(name = "expires_at")
-    val expiresAt: Instant? = null,
+    @Column(name = "deviceId", length = 64)
+    val deviceId: String? = null,
 
     @Column(name = "issued_at")
-    val issuedAt: Instant = Instant.now()
+    var issuedAt: Instant = Instant.now()
 )

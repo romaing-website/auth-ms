@@ -36,6 +36,14 @@ data class LoginRequest(
     )
     val type: String,
 
+    @field:NotBlank(message = "The timeZone field is required")
+    @field:Size(max = 100, message = "The timeZone must not exceed 100 characters")
+    @field:Pattern(
+        regexp = "^[A-Za-z/_+-]+$",
+        message = "The timeZone field contains invalid characters"
+    )
+    val timeZone: String,
+
     @field:Valid
     val response: KeyData
 )

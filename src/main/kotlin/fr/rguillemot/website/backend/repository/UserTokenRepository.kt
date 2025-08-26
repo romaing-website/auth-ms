@@ -5,4 +5,6 @@ import fr.rguillemot.website.backend.model.UserToken
 import org.springframework.stereotype.Repository
 
 @Repository
-interface UserTokenRepository : JpaRepository<UserToken, Long>
+interface UserTokenRepository : JpaRepository<UserToken, Long> {
+   // fun findByRefreshTokenAndDeviceId(refreshToken: String, deviceId: String): UserToken?
+}

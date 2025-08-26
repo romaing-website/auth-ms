@@ -62,7 +62,7 @@ fi
 
 # === ENV VARIABLES ===
 custom_echo "Setting up environment variables..."
-export DB_HOST=localhost
+export DB_HOST=db
 export DB_PORT=5432
 export DB_NAME=postgres
 export DB_USER=postgres
@@ -80,7 +80,7 @@ custom_echo "Environment variables set (DB_HOST=$DB_HOST, DB_PORT=$DB_PORT)."
 
 # === KILL EXISTING SPRING BOOT ON 8080 ===
 custom_echo "Killing any existing processes on port 8080..."
-if lsof -ti:8080 >/dev/null 2>&1; then
+if timeout 5 lsof -i :8080 >/dev/null 2>&1; then
     kill -9 $(lsof -ti:8080)
     custom_echo "Processes on port 8080 terminated." WARN
 else

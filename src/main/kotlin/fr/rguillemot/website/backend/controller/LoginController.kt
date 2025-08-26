@@ -3,10 +3,12 @@ package fr.rguillemot.website.backend.controller
 import fr.rguillemot.website.backend.repository.WebAuthnChallengesRepository
 import fr.rguillemot.website.backend.request.Login.LoginRequest
 import fr.rguillemot.website.backend.service.UserPassKeyService
+import fr.rguillemot.website.backend.service.UserTokenService
 import fr.rguillemot.website.backend.service.WebAuthnService
 import fr.rguillemot.website.backend.type.ApiResponse
 import fr.rguillemot.website.backend.type.CeremonyType
 import fr.rguillemot.website.backend.type.ChallengeRecord
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -22,8 +24,10 @@ import kotlin.collections.get
 class LoginController(
     private val webAuthnChallengesRepository: WebAuthnChallengesRepository,
     private val userPasskeyService: UserPassKeyService,
-    private val webAuthnService: WebAuthnService
+    private val webAuthnService: WebAuthnService,
+    private val userTokenService: UserTokenService,
 ) {
+
     @PostMapping("/login", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun login(): ResponseEntity<ApiResponse<Any>> {
             val challenge = webAuthnService.createLoginChallenge()
@@ -41,11 +45,16 @@ class LoginController(
 
     @PostMapping("/login/verify", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun loginCheck(
-        @Valid @RequestBody req: LoginRequest
+        @Valid @RequestBody req: LoginRequest,
+        request: HttpServletRequest
     ): ResponseEntity<ApiResponse<Any>> {
         val clientDataJson = String(java.util.Base64.getUrlDecoder().decode(req.response.clientDataJson))
         val clientData = com.fasterxml.jackson.module.kotlin.jacksonObjectMapper().readValue(clientDataJson, Map::class.java)
         val originalChallenge = clientData["challenge"] as String
+        val ip = request.remoteAddr
+        val userAgent = request.getHeader("User-Agent") ?: "Unknown"
+        val language = request.getHeader("Accept-Language") ?: "Unknown"
+        val timezone = req.timeZone
 
         val challengeData = webAuthnChallengesRepository.findByChallenge(originalChallenge)
         println("Stored challenge: ${challengeData?.challenge}")
@@ -94,12 +103,24 @@ class LoginController(
                 )
             }
         val user = userPasskeyService.getUser(req.id)
-
+        if(user == null) {
+            return ResponseEntity.badRequest().body(
+                ApiResponse(
+                    status = "error",
+                    message = "User not found",
+                    data = null
+                )
+            )
+        }
+        val tokens = userTokenService.createToken(user, ip, userAgent, language, timezone)
         return ResponseEntity.ok(
             ApiResponse(
                 status = "success",
                 message = "Login Successfull",
-                data = user
+                data = {
+                    "accessToken" to tokens.accessToken
+                    "refreshToken" to tokens.refreshToken
+                }
             )
         )
 
