@@ -1,4 +1,4 @@
-package fr.rguillemot.website.backend.request
+package fr.rguillemot.website.backend.authms.request.Register
 
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Email
